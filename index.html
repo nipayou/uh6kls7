@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ujian IPA - Ekologi & Keanekaragaman Hayati</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#dcfce7 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #4ade80; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #22c55e; }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .option-label:has(input:checked) {
+            background-color: #dcfce7;
+            border-color: #22c55e;
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen overflow-hidden flex justify-center items-center">
+
+    <!-- SCREEN 1: LOGIN / HOME -->
+    <div id="homeScreen" class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 m-4 max-h-[95vh] overflow-y-auto relative">
+        <div class="text-center mb-6">
+            <div class="text-5xl mb-2">🌿🌏</div>
+            <h1 class="text-2xl font-bold text-green-700">Ujian IPA Kelas 7</h1>
+            <p class="text-green-600 font-semibold">Ekologi & Keanekaragaman Hayati</p>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nama Lengkap</label>
+                <input type="text" id="inputNama" required class="w-full px-4 py-3 rounded-xl border-2 border-green-200 focus:border-green-500 focus:outline-none transition-colors" placeholder="Ketik namamu di sini...">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Nomor Absen</label>
+                <input type="number" id="inputAbsen" required class="w-full px-4 py-3 rounded-xl border-2 border-green-200 focus:border-green-500 focus:outline-none transition-colors" placeholder="Contoh: 15">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Pilih Jenis Ujian</label>
+                <select id="inputType" class="w-full px-4 py-3 rounded-xl border-2 border-green-200 focus:border-green-500 focus:outline-none transition-colors bg-white">
+                    <option value="ulangan">Ulangan Harian (20 Soal)</option>
+                    <option value="remidi">Remedial (20 Soal)</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transform transition hover:-translate-y-1 text-lg">
+                🚀 Mulai Ujian!
+            </button>
+        </form>
+        <p class="text-xs text-center text-gray-500 mt-4">Pastikan kamu siap! Sistem anti-curang aktif.</p>
+    </div>
+
+    <!-- SCREEN 2: QUIZ INTERFACE -->
+    <div id="quizScreen" class="hidden w-full h-full flex-col max-w-3xl mx-auto bg-white shadow-2xl relative">
+        <div class="bg-green-600 text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div>
+                <h2 id="headerName" class="font-bold text-lg leading-tight">Nama Siswa</h2>
+                <p id="headerType" class="text-sm text-green-200">Ulangan Harian</p>
+            </div>
+            <button onclick="toggleGrid()" class="p-2 bg-green-700 rounded-lg hover:bg-green-800 transition flex items-center gap-2">
+                <span class="font-bold">Navigasi</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 bg-gray-50 pb-24">
+            <div class="bg-white rounded-2xl shadow-sm border border-green-100 p-6 mb-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-green-100 text-green-700 font-bold px-3 py-1 rounded-lg text-sm">
+                        Soal <span id="currentQNumber">1</span> / <span id="totalQNumber">20</span>
+                    </div>
+                </div>
+                <p id="questionText" class="text-lg text-gray-800 font-semibold mb-6 leading-relaxed"></p>
+                <div id="optionsContainer" class="space-y-3"></div>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center mt-6 gap-3">
+                <button onclick="prevQuestion()" id="btnPrev" class="px-6 py-2 bg-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-300 disabled:opacity-50">⬅️ Sebelumnya</button>
+                <button onclick="submitExam()" id="btnSubmitMain" class="hidden px-6 py-2 bg-blue-500 text-white font-bold rounded-xl shadow hover:bg-blue-600 transition animate-pulse">Kirim Jawaban 🚀</button>
+                <button onclick="nextQuestion()" id="btnNext" class="px-6 py-2 bg-green-500 text-white font-bold rounded-xl hover:bg-green-600 disabled:opacity-50">Selanjutnya ➡️</button>
+            </div>
+        </div>
+
+        <div id="gridMenu" class="absolute inset-y-0 right-0 w-80 bg-white shadow-[-10px_0_15px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 z-20 flex flex-col border-l-2 border-green-100">
+            <div class="p-4 bg-green-50 border-b border-green-100 flex justify-between items-center">
+                <h3 class="font-bold text-green-800">Daftar Soal</h3>
+                <button onclick="toggleGrid()" class="text-gray-500 hover:text-red-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto">
+                <div id="numberGrid" class="grid grid-cols-5 gap-2"></div>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                <button id="btnSubmit" onclick="submitExam()" disabled class="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white font-bold py-3 rounded-xl shadow transition duration-200 flex justify-center items-center gap-2">
+                    <span>Kirim Jawaban</span>
+                </button>
+                <p id="submitWarning" class="text-xs text-red-500 text-center mt-2">Jawab semua soal untuk mengirim.</p>
+            </div>
+        </div>
+        <div id="gridOverlay" onclick="toggleGrid()" class="absolute inset-0 bg-black bg-opacity-50 z-10 hidden transition-opacity"></div>
+    </div>
+
+    <!-- SCREEN 3: RESULT -->
+    <div id="resultScreen" class="hidden w-full max-w-md bg-white rounded-3xl shadow-xl p-8 m-4 max-h-[95vh] overflow-y-auto relative text-center">
+        <div class="text-6xl mb-4" id="resultEmoji">🎉</div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h1>
+        <p class="text-gray-600 mb-6"><span id="resultSubtext">Kerja bagus</span>, <span id="resName" class="font-bold"></span>!</p>
+
+        <div class="bg-green-50 rounded-2xl p-6 mb-6 border-2 border-green-100">
+            <div class="text-5xl font-extrabold text-green-600 mb-2" id="resScore">100</div>
+            <div class="text-sm font-bold text-green-800 uppercase tracking-wider" id="resType">Ulangan Harian</div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-8 text-left">
+            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <div class="text-xs text-blue-500 font-bold uppercase">Benar</div>
+                <div class="text-2xl font-bold text-blue-700" id="resCorrect">0</div>
+            </div>
+            <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                <div class="text-xs text-red-500 font-bold uppercase">Salah</div>
+                <div class="text-2xl font-bold text-red-700" id="resWrong">0</div>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-xl border border-purple-100 col-span-2 text-center">
+                <div class="text-xs text-purple-500 font-bold uppercase">Pelanggaran</div>
+                <div class="text-xl font-bold text-purple-700" id="resCheat">0 Kali</div>
+            </div>
+        </div>
+
+        <button onclick="resetApp()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition">
+            🏠 Kembali ke Halaman Utama
+        </button>
+        <p id="savingText" class="text-xs text-green-600 mt-4 animate-pulse">Menyimpan data ke server...</p>
+    </div>
+
+    <!-- Modals -->
+    <div id="warningModal" class="hidden fixed inset-0 modal-overlay z-50 flex justify-center items-center">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 text-center shadow-2xl border-4 border-red-500">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h3 class="text-xl font-bold text-red-600 mb-2">Peringatan Anti-Curang!</h3>
+            <p class="text-gray-700 mb-6">Jangan keluar dari tab atau layar ujian!</p>
+            <button onclick="closeWarning()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-xl w-full">Saya Mengerti</button>
+        </div>
+    </div>
+
+    <div id="confirmSubmitModal" class="hidden fixed inset-0 modal-overlay z-50 flex justify-center items-center">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 text-center shadow-2xl border-4 border-blue-500">
+            <div class="text-5xl mb-4">🚀</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Kirim Jawaban?</h3>
+            <p class="text-gray-600 mb-6">Pastikan semua sudah terjawab. Tindakan ini tidak bisa dibatalkan.</p>
+            <div class="flex gap-4 justify-center">
+                <button onclick="closeConfirmModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-xl flex-1 transition">Batal</button>
+                <button onclick="executeSubmit()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-xl flex-1 shadow transition">Ya, Kirim!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const soalUlangan = [
+            { q: "Komponen abiotik dalam suatu ekosistem adalah …", opts: ["Hewan dan tumbuhan", "Air dan tanah", "Bakteri dan jamur", "Rantai makanan"], ans: 1 },
+            { q: "Urutan tingkatan organisasi kehidupan dari kecil ke besar adalah …", opts: ["Individu– komunitas– populasi– ekosistem– bioma– biosfer", "Individu– populasi– komunitas– ekosistem– bioma– biosfer", "Populasi– individu– komunitas– biosfer– bioma– ekosistem", "Komunitas– individu– populasi– bioma– ekosistem– biosfer"], ans: 1 },
+            { q: "Contoh hubungan simbiosis mutualisme adalah …", opts: ["Tali putri dengan inangnya", "Nyamuk dengan manusia", "Bunga dan lebah", "Cacing pita dalam usus"], ans: 2 },
+            { q: "Hubungan antara dua makhluk hidup di mana salah satu diuntungkan dan yang lain dirugikan disebut …", opts: ["Mutualisme", "Komensalisme", "Parasitisme", "Simbiosis"], ans: 2 },
+            { q: "Organisme yang berperan sebagai produsen dalam ekosistem adalah …", opts: ["Hewan pemakan tumbuhan", "Tumbuhan hijau", "Jamur", "Cacing tanah"], ans: 1 },
+            { q: "Konsumen tingkat pertama dalam rantai makanan biasanya adalah …", opts: ["Karnivora", "Omnivora", "Herbivora", "Pengurai"], ans: 2 },
+            { q: "Organisme yang berperan menguraikan sisa makhluk hidup adalah …", opts: ["Konsumen", "Pengurai (dekomposer)", "Produsen", "Parasit"], ans: 1 },
+            { q: "Daur ulang unsur hara dalam tanah dilakukan oleh …", opts: ["Konsumen", "Omnivora", "Dekomposer", "Herbivora"], ans: 2 },
+            { q: "Rantai makanan dimulai dari …", opts: ["Konsumen", "Dekomposer", "Produsen", "Karnivora"], ans: 2 },
+            { q: "Contoh rantai makanan yang benar adalah …", opts: ["Rumput → kelinci → singa", "Kucing → tikus → rumput", "Rumput → harimau → kerbau", "Elang → ayam → jagung"], ans: 0 },
+            { q: "Keanekaragaman hayati adalah …", opts: ["Jumlah makhluk hidup yang punah", "Perbedaan genetik dan spesies dalam suatu ekosistem", "Jumlah populasi manusia", "Kesamaan bentuk makhluk hidup"], ans: 1 },
+            { q: "Ciri khas fauna wilayah Indonesia bagian barat adalah …", opts: ["Banyak burung cenderawasih", "Terdapat komodo", "Memiliki mamalia besar seperti gajah dan harimau", "Fauna Australia"], ans: 2 },
+            { q: "Bioma hutan hujan tropis di Indonesia banyak ditemukan di wilayah …", opts: ["Pegunungan es", "Pulau Jawa", "Kalimantan dan Papua", "Gurun pasir"], ans: 2 },
+            { q: "Penebangan hutan secara liar dapat menyebabkan …", opts: ["Meningkatnya populasi hewan", "Keseimbangan ekosistem", "Kepunahan spesies", "Tanah menjadi subur"], ans: 2 },
+            { q: "Tujuan konservasi sumber daya alam adalah …", opts: ["Mengurangi populasi tumbuhan", "Menambah pembukaan lahan", "Menjaga kelestarian flora dan fauna", "Menebang pohon untuk industri"], ans: 2 },
+            { q: "Contoh konservasi in-situ adalah …", opts: ["Kebun binatang", "Penangkaran elang", "Taman nasional", "Laboratorium mikroba"], ans: 2 },
+            { q: "Contoh konservasi eks-situ adalah …", opts: ["Cagar alam", "Suaka margasatwa", "Penangkaran komodo", "Taman nasional"], ans: 2 },
+            { q: "Makhluk hidup saling bergantung satu sama lain dalam ekosistem untuk …", opts: ["Persaingan makanan", "Menciptakan populasi baru", "Menjaga kelangsungan hidup", "Menentukan tempat tinggal"], ans: 2 },
+            { q: "Jika satu spesies punah dalam suatu ekosistem, maka …", opts: ["Ekosistem tetap stabil", "Tidak ada pengaruh", "Rantai makanan terganggu", "Produsen akan punah"], ans: 2 },
+            { q: "Hewan endemik Indonesia yang hanya ditemukan di Pulau Komodo adalah …", opts: ["Orangutan", "Harimau", "Komodo", "Badak bercula satu"], ans: 2 }
+        ];
+
+        const soalRemidi = [
+            { q: "Manakah dari kelompok berikut yang seluruhnya merupakan komponen abiotik?", opts: ["Tumbuhan, hewan, dan bakteri", "Air, cahaya Matahari, dan suhu", "Jamur, tanah, dan kelembapan udara", "Manusia, salinitas, dan pH"], ans: 1 },
+            { q: "Sekumpulan kambing yang hidup berinteraksi di sebuah padang rumput merupakan contoh tingkatan …", opts: ["Individu", "Komunitas", "Populasi", "Ekosistem"], ans: 2 },
+            { q: "Apakah peran bakteri dan jamur dalam daur ulang unsur hara?", opts: ["Produsen", "Konsumen primer", "Predator puncak", "Pengurai (dekomposer)"], ans: 3 },
+            { q: "Proses mengubah energi cahaya Matahari menjadi energi kimia disebut …", opts: ["Respirasi", "Fotosintesis", "Amonifikasi", "Transpirasi"], ans: 1 },
+            { q: "Pada rantai: Rumput → Belalang → Katak → Ular, siapa konsumen tingkat II?", opts: ["Belalang", "Katak", "Ular", "Rumput"], ans: 1 },
+            { q: "Mengapa hanya sekitar 10% energi yang berpindah ke tingkat trofik berikutnya?", opts: ["Predator memuntahkan makanan", "Energi tersimpan di akar saja", "Energi hilang dalam bentuk panas & zat sisa", "Sinar matahari dipantulkan"], ans: 2 },
+            { q: "Penguapan air yang terjadi secara khusus dari daun tumbuh-tumbuhan dikenal sebagai …", opts: ["Presipitasi", "Kondensasi", "Evaporasi", "Transpirasi"], ans: 3 },
+            { q: "Hewan dan manusia mengembalikan CO2 ke atmosfer utamanya melalui proses …", opts: ["Fotosintesis", "Respirasi (pernapasan)", "Transpirasi", "Fiksasi"], ans: 1 },
+            { q: "Bagaimana nitrogen bebas di udara bisa masuk ke akar tanaman legum?", opts: ["Melalui pori daun", "Dibawa air hujan murni", "Difiksasi oleh bakteri bintil akar", "Diserap saat hewan bernapas"], ans: 2 },
+            { q: "Dua pohon bersaing mendapatkan cahaya Matahari. Interaksi ini disebut …", opts: ["Kompetisi", "Predasi", "Komensalisme", "Parasitisme"], ans: 0 },
+            { q: "Benalu yang menghisap nutrisi dari pohon mangga termasuk simbiosis …", opts: ["Mutualisme", "Parasitisme", "Komensalisme", "Herbivori"], ans: 1 },
+            { q: "Manakah contoh simbiosis mutualisme?", opts: ["Anggrek di dahan pohon", "Belalang makan padi", "Kupu-kupu dengan bunga", "Kucing tangkap tikus"], ans: 2 },
+            { q: "Ilmuwan Weber membagi fauna Indonesia menjadi tiga wilayah, yaitu …", opts: ["Barat, Utara, Selatan", "Asiatis dan Australis", "Orientalis, Paleartik, Neotropik", "Barat, Peralihan, Timur"], ans: 3 },
+            { q: "Tumbuhan endemik tanpa akar, daun, atau batang sejati yang terkenal adalah …", opts: ["Anggrek tebu", "Bunga Rafflesia arnoldii", "Pohon cendana", "Daun payung"], ans: 1 },
+            { q: "Dampak negatif utama sistem monokultur bagi ekosistem adalah …", opts: ["Meningkatkan serapan air", "Spesies baru lebih kuat", "Turunnya keanekaragaman hayati", "Oksigen naik tajam"], ans: 2 },
+            { q: "Pencemaran udara akibat gas sulfur dan nitrogen oksida menyebabkan …", opts: ["Pemanasan global", "Eutrofikasi", "Hujan asam", "Deforestasi"], ans: 2 },
+            { q: "Tujuan utama konservasi jika ditinjau dari sisi manfaat ekologi adalah …", opts: ["Keuntungan tiket wisata", "Mengurangi lahan industri", "Menjaga keseimbangan ekosistem", "Membatasi populasi hama"], ans: 2 },
+            { q: "Pelestarian spesies di dalam habitat aslinya dinamakan metode …", opts: ["In-situ", "Eks-situ", "Suaka buatan", "Ekowisata"], ans: 0 },
+            { q: "Manakah yang merupakan tempat penerapan konservasi eks-situ?", opts: ["Taman nasional", "Cagar alam", "Suaka margasatwa", "Kebun binatang"], ans: 3 },
+            { q: "Apabila produsen utama musnah, dampak langsung yang segera terjadi adalah …", opts: ["Ekosistem stabil", "Konsumen I kehilangan makanan", "Karnivora meningkat pesat", "Dekomposer mati mendadak"], ans: 1 }
+        ];
+
+        let currentSoalData = [];
+        let answers = [];
+        let currentQuestionIndex = 0;
+        let cheatCount = 0;
+        let isExamActive = false;
+        let studentData = { nama: '', absen: '', jenis: '' };
+
+        // Silakan ganti URL berikut dengan AppScript Anda jika ada
+        const sheetUlangan = "https://script.google.com/macros/s/AKfycbzFgk_0vhPuq7siEyw_hVPgmmsLhE0PwBcUYNvqvvufIrrRDcrZQm6FEQbpKrT7lJvo/exec";
+        const sheetRemidi = "https://script.google.com/macros/s/AKfycbzCe92bHZjOqpbctVovPc3mmZAJcNS3dPhygNw3RTM5t85Aw_QSvgMOYqJ68RWbSR97/exec";
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            studentData.nama = document.getElementById('inputNama').value;
+            studentData.absen = document.getElementById('inputAbsen').value;
+            studentData.jenis = document.getElementById('inputType').value;
+            startExam();
+        });
+
+        function startExam() {
+            let rawSoal = studentData.jenis === 'ulangan' ? soalUlangan : soalRemidi;
+            
+            // Pengacakan soal dan opsi
+            currentSoalData = JSON.parse(JSON.stringify(rawSoal)).map(q => {
+                let correctAnswerText = q.opts[q.ans];
+                for (let i = q.opts.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [q.opts[i], q.opts[j]] = [q.opts[j], q.opts[i]];
+                }
+                q.ans = q.opts.indexOf(correctAnswerText);
+                return q;
+            });
+
+            for (let i = currentSoalData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentSoalData[i], currentSoalData[j]] = [currentSoalData[j], currentSoalData[i]];
+            }
+
+            answers = new Array(currentSoalData.length).fill(null);
+            currentQuestionIndex = 0;
+            cheatCount = 0;
+
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.replace('hidden', 'flex');
+            document.getElementById('headerName').innerText = studentData.nama + " (#" + studentData.absen + ")";
+            document.getElementById('headerType').innerText = studentData.jenis === 'ulangan' ? 'Ulangan Harian' : 'Remedial';
+            document.getElementById('totalQNumber').innerText = currentSoalData.length;
+
+            isExamActive = true;
+            requestFullscreen();
+            renderQuestion();
+            renderGrid();
+        }
+
+        function renderQuestion() {
+            const qData = currentSoalData[currentQuestionIndex];
+            document.getElementById('currentQNumber').innerText = currentQuestionIndex + 1;
+            document.getElementById('questionText').innerText = qData.q;
+            
+            const optsContainer = document.getElementById('optionsContainer');
+            optsContainer.innerHTML = '';
+            const abcd = ['A', 'B', 'C', 'D'];
+
+            qData.opts.forEach((opt, idx) => {
+                const isSelected = answers[currentQuestionIndex] === idx;
+                const label = document.createElement('label');
+                label.className = `option-label flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${isSelected ? 'bg-green-100 border-green-500' : 'bg-white border-gray-200 hover:border-green-300 hover:bg-gray-50'}`;
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'option';
+                input.value = idx;
+                input.className = 'mt-1 w-5 h-5 text-green-600 focus:ring-green-500';
+                input.checked = isSelected;
+                input.onchange = () => selectAnswer(idx);
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'flex-1 text-gray-700 font-medium';
+                textSpan.innerHTML = `<strong class="text-green-700">${abcd[idx]}.</strong> ${opt}`;
+                
+                label.appendChild(input);
+                label.appendChild(textSpan);
+                optsContainer.appendChild(label);
+            });
+
+            document.getElementById('btnPrev').disabled = currentQuestionIndex === 0;
+            document.getElementById('btnNext').disabled = currentQuestionIndex === currentSoalData.length - 1;
+            checkSubmitCapability();
+        }
+
+        function selectAnswer(optIdx) {
+            answers[currentQuestionIndex] = optIdx;
+            renderQuestion();
+            renderGrid();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < currentSoalData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < currentSoalData.length; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i + 1;
+                let baseClass = "w-full aspect-square rounded-lg font-bold border-2 flex items-center justify-center transition ";
+                if (answers[i] !== null) baseClass += "bg-blue-100 border-blue-300 text-blue-700";
+                else baseClass += "bg-white border-gray-200 text-gray-600";
+                if (i === currentQuestionIndex) baseClass += " ring-2 ring-offset-1 ring-green-500 scale-105";
+                btn.className = baseClass;
+                btn.onclick = () => { currentQuestionIndex = i; renderQuestion(); toggleGrid(); };
+                grid.appendChild(btn);
+            }
+        }
+
+        function toggleGrid() {
+            const menu = document.getElementById('gridMenu');
+            const overlay = document.getElementById('gridOverlay');
+            if (menu.classList.contains('translate-x-full')) {
+                menu.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                menu.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function checkSubmitCapability() {
+            const isAllAnswered = answers.every(ans => ans !== null);
+            const btnSubmit = document.getElementById('btnSubmit');
+            const warning = document.getElementById('submitWarning');
+            const btnSubmitMain = document.getElementById('btnSubmitMain');
+            
+            if (isAllAnswered) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.replace('bg-gray-400', 'bg-blue-500');
+                warning.classList.add('hidden');
+                if(btnSubmitMain) btnSubmitMain.classList.remove('hidden');
+            } else {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('bg-gray-400');
+                warning.classList.remove('hidden');
+                if(btnSubmitMain) btnSubmitMain.classList.add('hidden');
+            }
+        }
+
+        function submitExam() {
+            const menu = document.getElementById('gridMenu');
+            if (!menu.classList.contains('translate-x-full')) toggleGrid();
+            document.getElementById('confirmSubmitModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() { document.getElementById('confirmSubmitModal').classList.add('hidden'); }
+
+        function executeSubmit() {
+            closeConfirmModal();
+            isExamActive = false;
+            
+            try {
+                const isInFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                if (isInFullscreen) {
+                    const exitFunc = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+                    if (exitFunc) exitFunc.call(document).catch(() => {});
+                }
+            } catch (err) {}
+            
+            calculateAndShowResult();
+        }
+
+        function calculateAndShowResult() {
+            let correct = 0;
+            const detail = [];
+            for (let i = 0; i < currentSoalData.length; i++) {
+                if (answers[i] === currentSoalData[i].ans) { correct++; detail.push(1); }
+                else detail.push(0);
+            }
+            const score = Math.round((correct / currentSoalData.length) * 100);
+            
+            document.getElementById('quizScreen').classList.replace('flex', 'hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('resName').innerText = studentData.nama;
+            document.getElementById('resType').innerText = studentData.jenis === 'ulangan' ? 'Ulangan Harian' : 'Remedial';
+            document.getElementById('resScore').innerText = score;
+            document.getElementById('resCorrect').innerText = correct;
+            document.getElementById('resWrong').innerText = currentSoalData.length - correct;
+            document.getElementById('resCheat').innerText = cheatCount + " Kali";
+            
+            if(score >= 75) {
+                document.getElementById('resultEmoji').innerText = "🥳";
+                document.getElementById('resultSubtext').innerText = "Hasil Memuaskan";
+            } else {
+                document.getElementById('resultEmoji').innerText = "💪";
+                document.getElementById('resultSubtext').innerText = "Tingkatkan Belajar";
+            }
+            sendDataToSheet(score, detail);
+        }
+
+        function sendDataToSheet(score, detail) {
+            const url = studentData.jenis === 'ulangan' ? sheetUlangan : sheetRemidi;
+            const payload = { nama: studentData.nama, absen: studentData.absen, jenisUjian: studentData.jenis, nilaiAkhir: score, pelanggaran: cheatCount, jawabanDetail: detail };
+            fetch(url, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) })
+            .then(() => {
+                document.getElementById('savingText').innerText = "✅ Berhasil disimpan.";
+                document.getElementById('savingText').classList.replace('text-green-600', 'text-blue-600');
+            }).catch(() => {
+                document.getElementById('savingText').innerText = "⚠️ Simpan manual (Screenshot).";
+            });
+        }
+
+        function resetApp() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('homeScreen').classList.remove('hidden');
+            studentData = { nama: '', absen: '', jenis: '' };
+            answers = [];
+            currentQuestionIndex = 0;
+            cheatCount = 0;
+            isExamActive = false;
+            document.getElementById('loginForm').reset();
+            const savingText = document.getElementById('savingText');
+            savingText.innerText = "Menyimpan data ke server...";
+            savingText.className = "text-xs text-green-600 mt-4 animate-pulse";
+        }
+
+        function requestFullscreen() {
+            const e = document.documentElement;
+            if (e.requestFullscreen) e.requestFullscreen().catch(() => {});
+            else if (e.webkitRequestFullscreen) e.webkitRequestFullscreen().catch(() => {});
+        }
+        function triggerCheatWarning() {
+            if (!isExamActive) return;
+            cheatCount++;
+            document.getElementById('warningModal').classList.remove('hidden');
+        }
+        function closeWarning() {
+            document.getElementById('warningModal').classList.add('hidden');
+            requestFullscreen();
+        }
+        document.addEventListener('visibilitychange', () => { if(document.hidden && isExamActive) triggerCheatWarning(); });
+        window.addEventListener('blur', () => { if(isExamActive) triggerCheatWarning(); });
+        document.addEventListener('fullscreenchange', () => { if(!document.fullscreenElement && isExamActive) triggerCheatWarning(); });
+    </script>
+</body>
+</html>
